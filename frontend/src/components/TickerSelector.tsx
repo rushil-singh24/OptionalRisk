@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import { API_BASE } from "../api";
 
 interface Ticker {
   ticker: string;
@@ -11,27 +11,12 @@ interface Ticker {
 interface Props {
   selectedTicker: string;
   onSelectTicker: (ticker: string, volatility: number, price: number) => void;
+  tickers: Ticker[];
+  loading: boolean;
 }
 
-const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker }) => {
-  const [tickers, setTickers] = useState<Ticker[]>([]);
-  const [loading, setLoading] = useState(true);
+const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker, tickers, loading }) => {
   const [searchTerm, setSearchTerm] = useState("");
-
-  useEffect(() => {
-    loadTickers();
-  }, []);
-
-  const loadTickers = async () => {
-    try {
-      const response = await axios.get("http://127.0.0.1:5000/market/tickers");
-      setTickers(response.data);
-      setLoading(false);
-    } catch (err) {
-      console.error("Error loading tickers:", err);
-      setLoading(false);
-    }
-  };
 
   const handleSelect = (ticker: Ticker) => {
     onSelectTicker(ticker.ticker, ticker.volatility, ticker.latest_price);
@@ -47,9 +32,10 @@ const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker }) => 
 
   return (
     <div>
-      <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: 500 }}>
-        Select Stock Ticker
-      </label>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+        <label style={{ fontWeight: 600 }}>Select Stock Ticker</label>
+        <span style={{ fontSize: "0.85rem", color: "#64748b" }}>API: {API_BASE}</span>
+      </div>
       
       <input
         type="text"

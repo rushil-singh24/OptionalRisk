@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import { simulatePortfolio } from "../api";
 import {
   Bar,
   BarChart,
@@ -17,25 +17,26 @@ interface Props {
   currentPrice: number;
   riskFreeRate: number;
   volatility: number;
+  ticker: string;
 }
 
-const MonteCarloChart: React.FC<Props> = ({ portfolio, currentPrice, riskFreeRate, volatility }) => {
+const MonteCarloChart: React.FC<Props> = ({ portfolio, currentPrice, riskFreeRate, volatility, ticker }) => {
   const [simulation, setSimulation] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   const runSimulation = async () => {
-    if (portfolio.length === 0) return;
+    if (portfolio.length === 0 || !ticker) return;
 
     setLoading(true);
     try {
-      const response = await axios.post("http://127.0.0.1:5000/portfolio/simulate", {
+      const response = await simulatePortfolio(
         portfolio,
-        current_price: currentPrice,
-        risk_free_rate: riskFreeRate,
-        horizon: 0.5, // 6 months
-        n_simulations: 10000,
-      });
-      setSimulation(response.data);
+        currentPrice,
+        riskFreeRate,
+        volatility,
+        ticker
+      );
+      setSimulation(response);
     } catch (err) {
       console.error("Monte Carlo simulation error:", err);
       alert("Failed to run simulation");
@@ -72,15 +73,15 @@ const MonteCarloChart: React.FC<Props> = ({ portfolio, currentPrice, riskFreeRat
       
       <button 
         onClick={runSimulation} 
-        disabled={loading || portfolio.length === 0}
+        disabled={loading || portfolio.length === 0 || !ticker}
         style={{
           padding: "0.5rem 1rem",
           backgroundColor: "#6366f1",
           color: "white",
           border: "none",
           borderRadius: "6px",
-          cursor: portfolio.length === 0 ? "not-allowed" : "pointer",
-          opacity: portfolio.length === 0 ? 0.5 : 1,
+          cursor: portfolio.length === 0 || !ticker ? "not-allowed" : "pointer",
+          opacity: portfolio.length === 0 || !ticker ? 0.5 : 1,
           marginBottom: "1rem"
         }}
       >

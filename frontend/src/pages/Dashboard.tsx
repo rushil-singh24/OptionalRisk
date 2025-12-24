@@ -4,7 +4,7 @@ import PortfolioSummary from "../components/PortfolioSummary";
 import GreeksChart from "../components/GreeksChart";
 import MonteCarloChart from "../components/MonteCarloChart";
 import TickerSelector from "../components/TickerSelector";
-import { analyzePortfolio } from "../api";
+import { analyzePortfolio, getTickers } from "../api";
 
 const Dashboard: React.FC = () => {
   const [portfolio, setPortfolio] = useState<any[]>([]);
@@ -14,6 +14,22 @@ const Dashboard: React.FC = () => {
   const [currentPrice, setCurrentPrice] = useState<number>(100);
   const [riskFreeRate, setRiskFreeRate] = useState<number>(0.03);
   const [loading, setLoading] = useState<boolean>(false);
+  const [tickers, setTickers] = useState<any[]>([]);
+  const [loadingTickers, setLoadingTickers] = useState<boolean>(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await getTickers();
+        setTickers(data);
+      } catch (err) {
+        console.error("Failed to load tickers", err);
+      } finally {
+        setLoadingTickers(false);
+      }
+    };
+    load();
+  }, []);
 
   const handleTickerSelect = (ticker: string, vol: number, price: number) => {
     setSelectedTicker(ticker);
@@ -28,14 +44,11 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    if (!selectedTicker) {
-      alert("Please select a stock ticker first.");
-      return;
-    }
+    const effectiveTicker = selectedTicker || portfolio[0]?.ticker;
 
     setLoading(true);
     try {
-      const result = await analyzePortfolio(portfolio, currentPrice, riskFreeRate);
+      const result = await analyzePortfolio(portfolio, currentPrice, riskFreeRate, effectiveTicker || "");
       console.log("Analysis result:", result);
       setSummary(result);
     } catch (err) {
@@ -45,6 +58,8 @@ const Dashboard: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const effectiveTicker = selectedTicker || portfolio[0]?.ticker || "";
 
   return (
     <div style={{ padding: "2rem", maxWidth: "1400px", margin: "0 auto" }}>
@@ -64,6 +79,8 @@ const Dashboard: React.FC = () => {
           <TickerSelector
             selectedTicker={selectedTicker}
             onSelectTicker={handleTickerSelect}
+            tickers={tickers}
+            loading={loadingTickers}
           />
         </section>
 
@@ -142,24 +159,26 @@ const Dashboard: React.FC = () => {
             portfolio={portfolio}
             setPortfolio={setPortfolio}
             defaultVolatility={volatility}
+            tickers={tickers}
+            loadingTickers={loadingTickers}
           />
         </section>
 
         {/* Analyze Button */}
         <button
           onClick={handleAnalyze}
-          disabled={loading || portfolio.length === 0 || !selectedTicker}
+          disabled={loading || portfolio.length === 0}
           style={{
             padding: "0.75rem 1.5rem",
             fontSize: "1rem",
             fontWeight: 600,
-            backgroundColor: selectedTicker && portfolio.length > 0 ? "#6366f1" : "#94a3b8",
+            backgroundColor: portfolio.length > 0 ? "#6366f1" : "#94a3b8",
             color: "white",
             border: "none",
             borderRadius: "8px",
-            cursor: portfolio.length === 0 || !selectedTicker ? "not-allowed" : "pointer",
+            cursor: portfolio.length === 0 ? "not-allowed" : "pointer",
             transition: "all 0.2s",
-            boxShadow: selectedTicker && portfolio.length > 0 ? "0 4px 6px rgba(99, 102, 241, 0.25)" : "none"
+            boxShadow: portfolio.length > 0 ? "0 4px 6px rgba(99, 102, 241, 0.25)" : "none"
           }}
         >
           {loading ? "⏳ Analyzing..." : "📊 Analyze Portfolio"}
@@ -186,6 +205,7 @@ const Dashboard: React.FC = () => {
               currentPrice={currentPrice}
               riskFreeRate={riskFreeRate}
               volatility={volatility}
+              ticker={effectiveTicker}
             />
           </>
         )}
