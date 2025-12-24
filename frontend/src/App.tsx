@@ -1,15 +1,10 @@
-/** Top-level app component rendering the dashboard shell. */
+import React from "react";
 import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
-    <div className="app-shell">
-      <header>
-        <h1>Options Risk Analysis</h1>
-        <p className="placeholder">
-          Placeholder UI for building portfolio analytics and risk simulations.
-        </p>
-      </header>
+    <div className="App">
+      <h1>Options Risk Dashboard</h1>
       <Dashboard />
     </div>
   );
