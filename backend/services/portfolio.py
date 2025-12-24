@@ -41,27 +41,23 @@ def compute_position_value(pos, S, r):
     T = pos["time_to_expiry"]
     sigma = pos["volatility"]
 
-    # Calculate Black-Scholes price
-    if option_type == "call":
-        value = black_scholes.call_price(S, K, T, r, sigma)
-    else:
-        value = black_scholes.put_price(S, K, T, r, sigma)
+    # Calculate Black-Scholes price using the correct function
+    value = black_scholes.black_scholes_price(S, K, r, sigma, T, option_type)
 
-    # Short positions have negative value
+    # Calculate Greeks using the correct function
+    greeks = black_scholes.black_scholes_greeks(S, K, r, sigma, T, option_type)
+
+    # Apply quantity multiplier
+    value *= qty
+    delta = greeks["delta"] * qty
+    gamma = greeks["gamma"] * qty
+    theta = greeks["theta"] * qty
+    vega = greeks["vega"] * qty
+    rho = greeks["rho"] * qty
+
+    # Adjust for short positions (invert signs)
     if side == "short":
         value *= -1
-
-    value *= qty
-
-    # Calculate Greeks
-    delta = black_scholes.delta(S, K, T, r, sigma, option_type) * qty
-    gamma = black_scholes.gamma(S, K, T, r, sigma) * qty
-    theta = black_scholes.theta(S, K, T, r, sigma, option_type) * qty
-    vega = black_scholes.vega(S, K, T, r, sigma) * qty
-    rho = black_scholes.rho(S, K, T, r, sigma, option_type) * qty
-
-    # Adjust Greeks for short positions
-    if side == "short":
         delta *= -1
         gamma *= -1
         theta *= -1
