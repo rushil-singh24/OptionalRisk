@@ -1,70 +1,59 @@
-/** Placeholder component for entering portfolio positions. */
-import { useState } from "react";
+import React, { useState } from "react";
 
-type Position = {
-  symbol: string;
-  quantity: number;
-  type: "call" | "put" | "";
-};
+interface Props {
+  portfolio: any[];
+  setPortfolio: (p: any[]) => void;
+  defaultVolatility: number;
+}
 
-const PositionForm = () => {
-  const [positions, setPositions] = useState<Position[]>([
-    { symbol: "", quantity: 0, type: "" },
-  ]);
+const PositionForm: React.FC<Props> = ({ portfolio, setPortfolio, defaultVolatility }) => {
+  const [position, setPosition] = useState({
+    type: "call",
+    side: "long",
+    quantity: 1,
+    strike: 100,
+    time_to_expiry: 0.5,
+    volatility: defaultVolatility
+  });
 
-  const addRow = () =>
-    setPositions((prev) => [...prev, { symbol: "", quantity: 0, type: "" }]);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setPosition({ ...position, [name]: name === "quantity" || name === "strike" || name === "time_to_expiry" || name === "volatility" ? parseFloat(value) : value });
+  };
+
+  const addPosition = () => {
+    setPortfolio([...portfolio, position]);
+    setPosition({
+      type: "call",
+      side: "long",
+      quantity: 1,
+      strike: 100,
+      time_to_expiry: 0.5,
+      volatility: defaultVolatility
+    });
+  };
 
   return (
     <div>
-      <p className="placeholder">
-        Capture option positions here; wire this up to backend analytics later.
-      </p>
-      <div className="grid" style={{ gridTemplateColumns: "1fr" }}>
-        {positions.map((pos, idx) => (
-          <div key={idx} className="card" style={{ padding: "0.75rem" }}>
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-              <input
-                type="text"
-                placeholder="Symbol"
-                value={pos.symbol}
-                onChange={(e) =>
-                  setPositions((prev) =>
-                    prev.map((p, i) => (i === idx ? { ...p, symbol: e.target.value } : p))
-                  )
-                }
-              />
-              <input
-                type="number"
-                placeholder="Quantity"
-                value={pos.quantity}
-                onChange={(e) =>
-                  setPositions((prev) =>
-                    prev.map((p, i) =>
-                      i === idx ? { ...p, quantity: Number(e.target.value) } : p
-                    )
-                  )
-                }
-              />
-              <select
-                value={pos.type}
-                onChange={(e) =>
-                  setPositions((prev) =>
-                    prev.map((p, i) => (i === idx ? { ...p, type: e.target.value as Position["type"] } : p))
-                  )
-                }
-              >
-                <option value="">Type</option>
-                <option value="call">Call</option>
-                <option value="put">Put</option>
-              </select>
-            </div>
-          </div>
-        ))}
-      </div>
-      <button onClick={addRow} style={{ marginTop: "0.75rem" }}>
-        Add Position
-      </button>
+      <select name="type" value={position.type} onChange={handleChange}>
+        <option value="call">Call</option>
+        <option value="put">Put</option>
+      </select>
+
+      <select name="side" value={position.side} onChange={handleChange}>
+        <option value="long">Long</option>
+        <option value="short">Short</option>
+      </select>
+
+      <input type="number" name="quantity" value={position.quantity} onChange={handleChange} placeholder="Quantity" />
+      <input type="number" name="strike" value={position.strike} onChange={handleChange} placeholder="Strike Price" />
+      <input type="number" step="0.01" name="time_to_expiry" value={position.time_to_expiry} onChange={handleChange} placeholder="Time to Expiry (years)" />
+      <input type="number" step="0.01" name="volatility" value={position.volatility} onChange={handleChange} placeholder="Volatility" />
+
+      <button onClick={addPosition}>Add Position</button>
+
+      <h3>Current Portfolio:</h3>
+      <pre>{JSON.stringify(portfolio, null, 2)}</pre>
     </div>
   );
 };
