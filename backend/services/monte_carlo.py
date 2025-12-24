@@ -1,6 +1,127 @@
-"""Placeholder Monte Carlo simulation service."""
+"""
+Monte Carlo simulation for options portfolio.
+
+This module simulates stock price paths using Geometric Brownian Motion (GBM)
+and computes portfolio outcomes under these simulated paths.
+"""
+
+import numpy as np
+from models import black_scholes  # import your pricing functions
 
 
-def run_monte_carlo_simulation(params):
-    """Run Monte Carlo paths to project portfolio outcomes."""
-    pass
+def simulate_stock_price(S0, T, r, sigma, steps=252, n_simulations=10000, seed=None):
+    """
+    Simulate stock price paths using GBM.
+    
+    Parameters:
+    S0 : float : initial stock price
+    T : float : time horizon in years
+    r : float : risk-free rate
+    sigma : float : volatility
+    steps : int : number of time steps
+    n_simulations : int : number of simulation paths
+    seed : int : random seed for reproducibility
+    
+    Returns:
+    np.ndarray : simulated price paths (n_simulations x steps)
+    """
+    if seed is not None:
+        np.random.seed(seed)
+
+    dt = T / steps
+    # Standard normal random numbers
+    Z = np.random.standard_normal((n_simulations, steps))
+    # Initialize price paths
+    S = np.zeros_like(Z)
+    S[:, 0] = S0
+
+    # Simulate paths
+    for t in range(1, steps):
+        S[:, t] = S[:, t - 1] * np.exp((r - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z[:, t])
+
+    return S
+
+
+def simulate_portfolio(portfolio_positions, S0, T, r, sigma, steps=252, n_simulations=10000):
+    """
+    Simulate portfolio outcomes at horizon T.
+    
+    Parameters:
+    portfolio_positions : list of dict
+        Each dict contains:
+        {
+            "type": "call" or "put",
+            "side": "long" or "short",
+            "quantity": int,
+            "strike": float,
+            "time_to_expiry": float,
+            "volatility": float
+        }
+    S0 : float : current stock price
+    T : float : simulation horizon in years
+    r : float : risk-free rate
+    sigma : float : volatility
+    steps : int : number of time steps
+    n_simulations : int : number of simulation paths
+    
+    Returns:
+    dict : {
+        "portfolio_values": np.ndarray of final portfolio values,
+        "mean": float,
+        "std": float,
+        "VaR_5": float,       # 5th percentile
+        "VaR_1": float        # 1st percentile
+    }
+    """
+    # Simulate stock paths
+    S_paths = simulate_stock_price(S0, T, r, sigma, steps, n_simulations)
+    
+    # Portfolio values at the end of the horizon
+    final_prices = S_paths[:, -1]
+    portfolio_values = np.zeros(n_simulations)
+    
+    for pos in portfolio_positions:
+        option_type = pos["type"]
+        side = pos["side"]
+        qty = pos["quantity"]
+        K = pos["strike"]
+        time_to_expiry = pos["time_to_expiry"]
+        vol = pos.get("volatility", sigma)
+        
+        # For each simulated price, compute option value at horizon
+        if option_type == "call":
+            payoff = np.maximum(final_prices - K, 0)
+        else:  # put
+            payoff = np.maximum(K - final_prices, 0)
+        
+        if side == "short":
+            payoff *= -1
+        
+        portfolio_values += qty * payoff
+
+    # Compute basic risk statistics
+    mean = np.mean(portfolio_values)
+    std = np.std(portfolio_values)
+    VaR_5 = np.percentile(portfolio_values, 5)
+    VaR_1 = np.percentile(portfolio_values, 1)
+
+    return {
+        "portfolio_values": portfolio_values,
+        "mean": mean,
+        "std": std,
+        "VaR_5": VaR_5,
+        "VaR_1": VaR_1
+    }
+
+
+if __name__ == "__main__":
+    # Quick test
+    test_positions = [
+        {"type": "call", "side": "long", "quantity": 1, "strike": 100, "time_to_expiry": 0.5, "volatility": 0.25},
+        {"type": "put", "side": "short", "quantity": 1, "strike": 95, "time_to_expiry": 0.5, "volatility": 0.25}
+    ]
+    
+    results = simulate_portfolio(test_positions, S0=100, T=0.5, r=0.03, sigma=0.25, n_simulations=5000)
+    print(f"Mean portfolio value: {results['mean']:.2f}")
+    print(f"Std portfolio value: {results['std']:.2f}")
+    print(f"5% VaR: {results['VaR_5']:.2f}")
