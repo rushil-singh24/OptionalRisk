@@ -32,9 +32,14 @@ const PositionForm: React.FC<Props> = ({ portfolio, setPortfolio, defaultVolatil
     setPosition((prev) => ({ ...prev, volatility: defaultVolatility }));
   }, [defaultVolatility]);
 
-  const filteredTickers = tickers.filter(t =>
-    t.ticker.toLowerCase().includes(tickerSearch.toLowerCase())
-  );
+  const filteredTickers = tickers.filter(t => {
+    const term = tickerSearch.toLowerCase().trim();
+    if (!term) return true;
+    return (
+      t.ticker.toLowerCase().includes(term) ||
+      (t.brand_name || "").toLowerCase().includes(term)
+    );
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -101,6 +106,9 @@ const PositionForm: React.FC<Props> = ({ portfolio, setPortfolio, defaultVolatil
                   }}
                 >
                   <div style={{ fontWeight: 600 }}>{t.ticker}</div>
+                  {t.brand_name && (
+                    <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>{t.brand_name}</div>
+                  )}
                   <div style={{ fontSize: "0.85rem", color: "#64748b" }}>
                     σ={t.volatility.toFixed(4)} | ${t.latest_price.toFixed(2)}
                   </div>

@@ -22,9 +22,14 @@ const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker, ticke
     onSelectTicker(ticker.ticker, ticker.volatility, ticker.latest_price);
   };
 
-  const filteredTickers = tickers.filter(t =>
-    t.ticker.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTickers = tickers.filter(t => {
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) return true;
+    return (
+      t.ticker.toLowerCase().includes(term) ||
+      (t.brand_name || "").toLowerCase().includes(term)
+    );
+  });
 
   if (loading) {
     return <div>Loading tickers...</div>;
@@ -90,6 +95,11 @@ const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker, ticke
                   <span style={{ fontWeight: 600, fontSize: "0.95rem" }}>
                     {ticker.ticker}
                   </span>
+                  {ticker.brand_name && (
+                    <div style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
+                      {ticker.brand_name}
+                    </div>
+                  )}
                   <div style={{ fontSize: "0.85rem", color: "#64748b" }}>
                     σ={ticker.volatility.toFixed(4)} | ${ticker.latest_price.toFixed(2)}
                   </div>
