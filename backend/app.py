@@ -1,22 +1,103 @@
+import json
+import os
+from pathlib import Path
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import json
+
 from services import portfolio
 from services import monte_carlo
+# ----------------------------
+# Environment loading (simple .env parser)
+# ----------------------------
+BASE_DIR = Path(__file__).resolve().parent
+ENV_PATH = BASE_DIR / ".env"
+
+
+def load_env_file(env_path: Path):
+    if not env_path.exists():
+        return
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip()
+        os.environ.setdefault(key, value)
+
+
+load_env_file(ENV_PATH)
+
+# ----------------------------
+# Config from environment
+# ----------------------------
+def get_env_float(key: str, default: float) -> float:
+    try:
+        return float(os.getenv(key, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def get_env_int(key: str, default: int) -> int:
+    try:
+        return int(os.getenv(key, default))
+    except (TypeError, ValueError):
+        return default
+
+
+def get_env_bool(key: str, default: bool) -> bool:
+    val = os.getenv(key)
+    if val is None:
+        return default
+    return str(val).lower() in {"1", "true", "yes", "y", "on"}
+
+
+HOST = os.getenv("HOST", "0.0.0.0")
+PORT = get_env_int("PORT", 5001)
+FLASK_ENV = os.getenv("FLASK_ENV", "development")
+FLASK_DEBUG = get_env_bool("FLASK_DEBUG", True)
+VOL_PATH = os.getenv("VOLATILITY_DATA_PATH", "data/processed/volatility.json")
+DEFAULT_RISK_FREE = get_env_float("DEFAULT_RISK_FREE_RATE", 0.036)
+DEFAULT_VOL = get_env_float("DEFAULT_VOLATILITY", 0.25)
+DEFAULT_PRICE = get_env_float("DEFAULT_CURRENT_PRICE", 100.0)
+DEFAULT_MC_SIMS = get_env_int("DEFAULT_MC_SIMULATIONS", 10000)
+DEFAULT_MC_HORIZON = get_env_float("DEFAULT_MC_HORIZON_YEARS", 0.5)
+DEFAULT_MC_STEPS = get_env_int("DEFAULT_MC_STEPS", 252)
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+# ----------------------------
+# Logging configuration
+# ----------------------------
+import logging
+logging.basicConfig(level=getattr(logging, LOG_LEVEL.upper(), logging.INFO))
 
 # ----------------------------
 # Flask app initialization
 # ----------------------------
 app = Flask(__name__)
-CORS(app)
+
+# Configure CORS from env if provided
+if CORS_ORIGINS:
+    origins = [o.strip() for o in CORS_ORIGINS.split(",") if o.strip()]
+    CORS(app, resources={r"/*": {"origins": origins}})
+else:
+    CORS(app)
 
 # ----------------------------
 # Load processed volatility data
 # ----------------------------
+vol_path = Path(VOL_PATH)
+if not vol_path.is_absolute():
+    vol_path = BASE_DIR / vol_path
+
 try:
-    with open("data/processed/volatility.json") as f:
+    with open(vol_path) as f:
         VOL_DATA = json.load(f)
-        print(f"✓ Loaded volatility data for {VOL_DATA['metadata']['total_tickers']} tickers")
+        print(f"✓ Loaded volatility data for {VOL_DATA['metadata']['total_tickers']} tickers from {vol_path}")
 except FileNotFoundError:
     print("Warning: volatility.json not found. Run preprocess_data.py first.")
     VOL_DATA = {
@@ -86,8 +167,8 @@ def get_volatility():
         # Fallback
         return jsonify({
             "ticker": "UNKNOWN",
-            "historical_volatility": 0.25,
-            "latest_price": 100.0
+            "historical_volatility": DEFAULT_VOL,
+            "latest_price": DEFAULT_PRICE
         })
 
 # ----------------------------
@@ -100,12 +181,12 @@ def analyze_portfolio():
         return jsonify({"error": "Portfolio data required"}), 400
 
     portfolio_positions = data["portfolio"]
-    S = data.get("current_price", 100)
-    r = data.get("risk_free_rate", 0.036)
+    S = data.get("current_price", DEFAULT_PRICE)
+    r = data.get("risk_free_rate", DEFAULT_RISK_FREE)
     ticker = data.get("ticker", "").upper()
 
     # Fill missing volatilities from dataset
-    default_vol = 0.25
+    default_vol = DEFAULT_VOL
     if ticker and ticker in VOL_DATA.get("tickers", {}):
         default_vol = VOL_DATA["tickers"][ticker]["volatility"]
     
@@ -126,14 +207,14 @@ def simulate_portfolio_route():
         return jsonify({"error": "Portfolio data required"}), 400
 
     portfolio_positions = data["portfolio"]
-    S = data.get("current_price", 100)
-    r = data.get("risk_free_rate", 0.036)
-    T = data.get("horizon", 0.5)  # years
-    n_simulations = data.get("n_simulations", 10000)
+    S = data.get("current_price", DEFAULT_PRICE)
+    r = data.get("risk_free_rate", DEFAULT_RISK_FREE)
+    T = data.get("horizon", DEFAULT_MC_HORIZON)  # years
+    n_simulations = data.get("n_simulations", DEFAULT_MC_SIMS)
     ticker = data.get("ticker", "").upper()
 
     # Get volatility from dataset
-    sigma = 0.25
+    sigma = DEFAULT_VOL
     if ticker and ticker in VOL_DATA.get("tickers", {}):
         sigma = VOL_DATA["tickers"][ticker]["volatility"]
 
@@ -143,7 +224,13 @@ def simulate_portfolio_route():
             pos["volatility"] = sigma
 
     simulation = monte_carlo.simulate_portfolio(
-        portfolio_positions, S, T, r, sigma, n_simulations=n_simulations
+        portfolio_positions,
+        S,
+        T,
+        r,
+        sigma,
+        steps=DEFAULT_MC_STEPS,
+        n_simulations=n_simulations
     )
 
     # Convert numpy arrays to lists for JSON serialization
@@ -160,7 +247,7 @@ if __name__ == "__main__":
     print("Options Risk Analysis Backend")
     print("="*60)
     print(f"Tickers loaded: {VOL_DATA['metadata']['total_tickers']}")
-    print("Server starting on http://127.0.0.1:5001")
+    print(f"Server starting on http://{HOST}:{PORT}")
     print("="*60 + "\n")
     
-    app.run(debug=True, host="0.0.0.0", port=5001)
+    app.run(debug=FLASK_DEBUG, host=HOST, port=PORT)
