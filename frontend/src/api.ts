@@ -2,8 +2,7 @@ import axios from "axios";
 
 // Central API base so we can switch ports easily (defaulting to backend port 5001)
 export const API_BASE =
-  (import.meta as any)?.env?.VITE_API_BASE ||
-  "http://127.0.0.1:5001";
+  import.meta.env.VITE_API_BASE || "http://127.0.0.1:5001";
 
 console.log("🔍 API_BASE is:", API_BASE);
 console.log("🔍 VITE_API_BASE:", (import.meta as any)?.env?.VITE_API_BASE);
