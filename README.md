@@ -28,7 +28,7 @@ Options Risk Analysis helps you understand and manage options trading risk throu
 - Black-Scholes implementation from scratch
 
 **Data:**
-- Historical price data with calculated volatilities
+- Historical price data with calculated volatilities from https://www.kaggle.com/datasets/nelgiriyewithana/world-stock-prices-daily-updating?resource=download 
 - Multi-year coverage for 61+ tickers
 - JSON-based processed dataset
 
