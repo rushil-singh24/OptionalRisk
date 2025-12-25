@@ -91,14 +91,5 @@ This tool bridges the gap between theoretical finance and practical application.
 
 ...this provides hands-on experience with real models and real data.
 
-## Screenshots
-
-*(Add screenshots of your dashboard, Greeks visualization, and Monte Carlo results)*
-
-## License
-
-MIT
-
-## Author
 
 Built as a demonstration of full-stack quantitative finance development.
