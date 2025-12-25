@@ -9,10 +9,10 @@ import json
 import os
 from pathlib import Path
 
-# Configuration
-RAW_DATA_PATH = "backend/data/raw"  # Folder containing CSV files
-PROCESSED_DATA_PATH = "backend/data/processed"
-OUTPUT_FILE = os.path.join(PROCESSED_DATA_PATH, "volatility.json")
+# Resolve paths relative to this script's location to avoid cwd issues
+RAW_DATA_PATH = Path(__file__).resolve().parent  # backend/data/raw
+PROCESSED_DATA_PATH = RAW_DATA_PATH.parent / "processed"
+OUTPUT_FILE = PROCESSED_DATA_PATH / "volatility.json"
 
 def calculate_volatility(df, ticker):
     """

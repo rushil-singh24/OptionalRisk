@@ -1,9 +1,9 @@
 import axios from "axios";
 
-// Central API base so we can switch ports easily (e.g., 5001 if 5000 is taken)
+// Central API base so we can switch ports easily (defaulting to backend port 5001)
 export const API_BASE =
   (import.meta as any)?.env?.VITE_API_BASE ||
-  "http://127.0.0.1:5000";
+  "http://127.0.0.1:5001";
 
 export const getHealth = async () => {
   const response = await axios.get(`${API_BASE}/health`);

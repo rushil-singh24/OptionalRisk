@@ -38,8 +38,8 @@ const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker, ticke
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-        <label style={{ fontWeight: 600 }}>Select Stock Ticker</label>
-        <span style={{ fontSize: "0.85rem", color: "#64748b" }}>API: {API_BASE}</span>
+        <label style={{ fontWeight: 700, color: "#e2e8f0" }}>Select Stock Ticker</label>
+        <span style={{ fontSize: "0.85rem", color: "#94a3b8" }}>API: {API_BASE}</span>
       </div>
       
       <input
@@ -51,20 +51,23 @@ const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker, ticke
           width: "100%",
           padding: "0.5rem",
           marginBottom: "0.5rem",
-          border: "1px solid #e2e8f0",
-          borderRadius: "6px"
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "8px",
+          backgroundColor: "rgba(255,255,255,0.04)",
+          color: "#e2e8f0"
         }}
       />
 
       <div style={{
         maxHeight: "200px",
         overflowY: "auto",
-        border: "1px solid #e2e8f0",
-        borderRadius: "6px",
-        backgroundColor: "#f8fafc"
+        border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: "10px",
+        backgroundColor: "#0b1020",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)"
       }}>
         {filteredTickers.length === 0 ? (
-          <div style={{ padding: "1rem", textAlign: "center", color: "#64748b" }}>
+          <div style={{ padding: "1rem", textAlign: "center", color: "#94a3b8" }}>
             No tickers found
           </div>
         ) : (
@@ -75,13 +78,14 @@ const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker, ticke
               style={{
                 padding: "0.75rem",
                 cursor: "pointer",
-                borderBottom: "1px solid #e2e8f0",
-                backgroundColor: selectedTicker === ticker.ticker ? "#eef2ff" : "transparent",
-                transition: "background-color 0.2s"
+                borderBottom: "1px solid rgba(255,255,255,0.06)",
+                backgroundColor: selectedTicker === ticker.ticker ? "rgba(124, 58, 237, 0.12)" : "transparent",
+                transition: "background-color 0.2s",
+                color: "#e2e8f0"
               }}
               onMouseEnter={(e) => {
                 if (selectedTicker !== ticker.ticker) {
-                  e.currentTarget.style.backgroundColor = "#f1f5f9";
+                  e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.04)";
                 }
               }}
               onMouseLeave={(e) => {
@@ -100,12 +104,12 @@ const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker, ticke
                       {ticker.brand_name}
                     </div>
                   )}
-                  <div style={{ fontSize: "0.85rem", color: "#64748b" }}>
+                  <div style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
                     σ={ticker.volatility.toFixed(4)} | ${ticker.latest_price.toFixed(2)}
                   </div>
                 </div>
                 {selectedTicker === ticker.ticker && (
-                  <span style={{ color: "#6366f1", fontSize: "1.2rem" }}>✓</span>
+                  <span style={{ color: "#38bdf8", fontSize: "1.2rem" }}>✓</span>
                 )}
               </div>
             </div>
@@ -117,9 +121,11 @@ const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker, ticke
         <div style={{
           marginTop: "1rem",
           padding: "0.75rem",
-          backgroundColor: "#eef2ff",
-          borderRadius: "6px",
-          fontSize: "0.9rem"
+          backgroundColor: "rgba(56, 189, 248, 0.12)",
+          borderRadius: "8px",
+          fontSize: "0.9rem",
+          color: "#e2e8f0",
+          border: "1px solid rgba(56, 189, 248, 0.35)"
         }}>
           <strong>Selected:</strong> {selectedTicker}
         </div>

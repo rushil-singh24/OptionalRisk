@@ -12,7 +12,7 @@ const Dashboard: React.FC = () => {
   const [selectedTicker, setSelectedTicker] = useState<string>("");
   const [volatility, setVolatility] = useState<number>(0.25);
   const [currentPrice, setCurrentPrice] = useState<number>(100);
-  const [riskFreeRate, setRiskFreeRate] = useState<number>(0.03);
+  const [riskFreeRate, setRiskFreeRate] = useState<number>(0.036);
   const [loading, setLoading] = useState<boolean>(false);
   const [tickers, setTickers] = useState<any[]>([]);
   const [loadingTickers, setLoadingTickers] = useState<boolean>(true);
@@ -78,43 +78,83 @@ const Dashboard: React.FC = () => {
   return (
     <div className="page">
       <header className="hero">
-        <div className="hero-eyebrow">Black-Scholes + Monte Carlo in one workflow</div>
-        <h1>Understand, build, and stress-test options portfolios</h1>
-        <p className="hero-subtitle">
-          Start with the theory, pick underlyings from the dataset, assemble trades, then run Black-Scholes analytics and Monte Carlo simulations.
-        </p>
-        <div className="hero-stats">
-          <div className="pill">Data coverage: {loadingTickers ? "loading…" : `${tickers.length} tickers`}</div>
-          <div className="pill">Greeks + VaR in seconds</div>
-          <div className="pill">Historical vols auto-filled</div>
+        <div className="hero-grid">
+          <div className="hero-text">
+            <div className="hero-eyebrow">Black-Scholes × Monte Carlo</div>
+            <h1 className="hero-title">Option(al) Risk</h1>
+            <p className="hero-subheadline">Understand, build, and stress-test options portfolios.</p>
+            <p className="hero-subtitle">
+              The Black–Scholes equation prices options by blending spot, strike, time to expiry, volatility, and the risk-free rate under smooth price paths.
+              Monte Carlo simulations complement it by simulating thousands of noisy futures to expose downside risk, stress scenarios, and the range of outcomes beyond a single path.
+            </p>
+            <div className="hero-stats">
+              <div className="pill">Data coverage: {loadingTickers ? "loading…" : `${tickers.length} tickers`}</div>
+              <div className="pill">Greeks + VaR in seconds</div>
+              <div className="pill">Historical vols auto-filled</div>
+            </div>
+          </div>
+          <div className="hero-visual">
+            <div className="formula-card">
+              <div className="formula-card__title">Black–Scholes model</div>
+              <div className="formula-card__body">
+                <div className="formula-card__lhs">
+                  <div className="formula-card__eq">C = S·N(d₁) − K·e<sup>−r·t</sup>·N(d₂)</div>
+                  <div className="formula-card__where">where</div>
+                  <div className="formula-card__d1d2">
+                    <div className="formula-card__d1">d₁ = [ln(S/K) + (r + σ²/2)·t] / (σ·√t)</div>
+                    <div className="formula-card__d2">d₂ = d₁ − σ·√t</div>
+                  </div>
+                </div>
+                <div className="formula-card__rhs">
+                  <div>C = Call option price</div>
+                  <div>S = Current stock price</div>
+                  <div>K = Strike price</div>
+                  <div>r = Risk-free rate</div>
+                  <div>t = Time to maturity</div>
+                  <div>N = Normal CDF</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
       <section className="info-grid">
         <article className="info-card">
-          <h3>Black-Scholes primer</h3>
-          <p>
-            Closed-form pricing for vanilla options (European as the baseline). Use it to sanity-check prices and read sensitivities (Δ, Γ, Vega, Θ, ρ).
-          </p>
-          <div className="formula-block">
-            <div className="formula-title">Call price</div>
-            <div className="formula-body">C = S·N(d1) − K·exp(-rT)·N(d2)</div>
+          <h3>“Greeks” in Black–Scholes</h3>
+          <p>Greeks measure risk. They tell you how an option’s value changes when something in the market changes.</p>
+          <div className="greeks-table">
+            <div className="greeks-row greeks-head">
+              <div>Greek</div>
+              <div>What It Measures</div>
+              <div>Units</div>
+            </div>
+            <div className="greeks-row">
+              <div>Delta (Δ)</div>
+              <div>Sensitivity to underlying price</div>
+              <div>Option price change per $1 change in stock price</div>
+            </div>
+            <div className="greeks-row">
+              <div>Gamma (Γ)</div>
+              <div>Sensitivity of delta to price</div>
+              <div>Change in delta per $1 change in stock price</div>
+            </div>
+            <div className="greeks-row">
+              <div>Theta (Θ)</div>
+              <div>Sensitivity to time</div>
+              <div>Option price change per day</div>
+            </div>
+            <div className="greeks-row">
+              <div>Vega (ν)</div>
+              <div>Sensitivity to volatility</div>
+              <div>Option price change per 1% change in volatility</div>
+            </div>
+            <div className="greeks-row">
+              <div>Rho (ρ)</div>
+              <div>Sensitivity to interest rates</div>
+              <div>Option price change per 1% change in interest rate</div>
+            </div>
           </div>
-          <div className="formula-grid">
-            <div className="chip">d1 = (ln(S/K) + (r + 0.5σ²)T) / (σ√T)</div>
-            <div className="chip">d2 = d1 − σ√T</div>
-          </div>
-          <div className="vars-grid">
-            <span className="var-pill">S: spot</span>
-            <span className="var-pill">K: strike</span>
-            <span className="var-pill">r: risk-free rate</span>
-            <span className="var-pill">T: time (years)</span>
-            <span className="var-pill">σ: volatility</span>
-            <span className="var-pill">N(): normal CDF</span>
-          </div>
-          <p className="small-muted" style={{ marginTop: "0.5rem" }}>
-            Use: fair-value checks, intuition for how price moves with underlyings, time, rates, and volatility.
-          </p>
         </article>
         <article className="info-card">
           <h3>Monte Carlo intuition</h3>
@@ -181,10 +221,10 @@ const Dashboard: React.FC = () => {
                 <input
                   type="number"
                   step="0.1"
-                  value={riskFreeRate * 100}
+                  value={Number((riskFreeRate * 100).toFixed(3))}
                   onChange={e => setRiskFreeRate(parseFloat(e.target.value) / 100)}
                 />
-                <div className="helper-text">Current risk-free rate: {(riskFreeRate * 100).toFixed(1)}%</div>
+                <div className="helper-text">Current risk-free rate: {(riskFreeRate * 100).toFixed(2)}%</div>
               </div>
               <div>
                 <label className="field-label">Historical Volatility (σ)</label>

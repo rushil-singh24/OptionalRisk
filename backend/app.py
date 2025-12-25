@@ -101,7 +101,7 @@ def analyze_portfolio():
 
     portfolio_positions = data["portfolio"]
     S = data.get("current_price", 100)
-    r = data.get("risk_free_rate", 0.03)
+    r = data.get("risk_free_rate", 0.036)
     ticker = data.get("ticker", "").upper()
 
     # Fill missing volatilities from dataset
@@ -127,7 +127,7 @@ def simulate_portfolio_route():
 
     portfolio_positions = data["portfolio"]
     S = data.get("current_price", 100)
-    r = data.get("risk_free_rate", 0.03)
+    r = data.get("risk_free_rate", 0.036)
     T = data.get("horizon", 0.5)  # years
     n_simulations = data.get("n_simulations", 10000)
     ticker = data.get("ticker", "").upper()
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     print("Options Risk Analysis Backend")
     print("="*60)
     print(f"Tickers loaded: {VOL_DATA['metadata']['total_tickers']}")
-    print("Server starting on http://127.0.0.1:5000")
+    print("Server starting on http://127.0.0.1:5001")
     print("="*60 + "\n")
     
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5001)

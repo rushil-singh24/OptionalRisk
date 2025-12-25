@@ -70,9 +70,9 @@ const PositionForm: React.FC<Props> = ({ portfolio, setPortfolio, defaultVolatil
   };
 
   return (
-    <div style={{ display: "grid", gap: "0.75rem" }}>
+    <div style={{ display: "grid", gap: "0.75rem", color: "#e2e8f0" }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 500 }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 600 }}>
           Ticker
           <input
             type="text"
@@ -83,13 +83,26 @@ const PositionForm: React.FC<Props> = ({ portfolio, setPortfolio, defaultVolatil
               setTickerSearch(e.target.value);
               setPosition({ ...position, ticker: "" });
             }}
-            style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid #e2e8f0" }}
+            style={{
+              padding: "0.5rem",
+              borderRadius: "8px",
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.03)",
+              color: "#e2e8f0"
+            }}
           />
-          <div style={{ maxHeight: "140px", overflowY: "auto", border: "1px solid #e2e8f0", borderRadius: "6px", background: "#f8fafc" }}>
+          <div style={{
+            maxHeight: "140px",
+            overflowY: "auto",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "10px",
+            background: "#0b1020",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)"
+          }}>
             {loadingTickers ? (
-              <div style={{ padding: "0.5rem", color: "#64748b" }}>Loading tickers...</div>
+              <div style={{ padding: "0.5rem", color: "#94a3b8" }}>Loading tickers...</div>
             ) : filteredTickers.length === 0 ? (
-              <div style={{ padding: "0.5rem", color: "#64748b" }}>No matches</div>
+              <div style={{ padding: "0.5rem", color: "#94a3b8" }}>No matches</div>
             ) : (
               filteredTickers.map(t => (
                 <div
@@ -101,15 +114,17 @@ const PositionForm: React.FC<Props> = ({ portfolio, setPortfolio, defaultVolatil
                   style={{
                     padding: "0.5rem",
                     cursor: "pointer",
-                    borderBottom: "1px solid #e2e8f0",
-                    backgroundColor: position.ticker === t.ticker ? "#eef2ff" : "transparent"
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    backgroundColor: position.ticker === t.ticker ? "rgba(124, 58, 237, 0.12)" : "transparent",
+                    color: "#e2e8f0",
+                    transition: "background-color 0.2s"
                   }}
                 >
                   <div style={{ fontWeight: 600 }}>{t.ticker}</div>
                   {t.brand_name && (
                     <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>{t.brand_name}</div>
                   )}
-                  <div style={{ fontSize: "0.85rem", color: "#64748b" }}>
+                  <div style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
                     σ={t.volatility.toFixed(4)} | ${t.latest_price.toFixed(2)}
                   </div>
                 </div>
@@ -118,41 +133,77 @@ const PositionForm: React.FC<Props> = ({ portfolio, setPortfolio, defaultVolatil
           </div>
         </label>
 
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 500 }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 600 }}>
           Option Type
-          <select name="type" value={position.type} onChange={handleChange} style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+          <select name="type" value={position.type} onChange={handleChange} style={{
+            padding: "0.5rem",
+            borderRadius: "8px",
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.03)",
+            color: "#e2e8f0"
+          }}>
             <option value="call">Call</option>
             <option value="put">Put</option>
           </select>
         </label>
 
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 500 }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 600 }}>
           Position Side
-          <select name="side" value={position.side} onChange={handleChange} style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+          <select name="side" value={position.side} onChange={handleChange} style={{
+            padding: "0.5rem",
+            borderRadius: "8px",
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.03)",
+            color: "#e2e8f0"
+          }}>
             <option value="long">Long</option>
             <option value="short">Short</option>
           </select>
         </label>
 
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 500 }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 600 }}>
           Quantity (contracts)
-          <input type="number" name="quantity" value={position.quantity} onChange={handleChange} placeholder="e.g. 1" style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
+          <input type="number" name="quantity" value={position.quantity} onChange={handleChange} placeholder="e.g. 1" style={{
+            padding: "0.5rem",
+            borderRadius: "8px",
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.03)",
+            color: "#e2e8f0"
+          }} />
         </label>
 
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 500 }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 600 }}>
           Strike Price
-          <input type="number" name="strike" value={position.strike} onChange={handleChange} placeholder="e.g. 100" style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
+          <input type="number" name="strike" value={position.strike} onChange={handleChange} placeholder="e.g. 100" style={{
+            padding: "0.5rem",
+            borderRadius: "8px",
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.03)",
+            color: "#e2e8f0"
+          }} />
         </label>
 
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 500 }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 600 }}>
           Time to Expiry (years)
-          <input type="number" step="0.01" name="time_to_expiry" value={position.time_to_expiry} onChange={handleChange} placeholder="0.5 = 6 months" style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
+          <input type="number" step="0.01" name="time_to_expiry" value={position.time_to_expiry} onChange={handleChange} placeholder="0.5 = 6 months" style={{
+            padding: "0.5rem",
+            borderRadius: "8px",
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.03)",
+            color: "#e2e8f0"
+          }} />
         </label>
 
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 500 }}>
+        <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontWeight: 600 }}>
           Volatility (σ)
-          <input type="number" step="0.01" name="volatility" value={position.volatility} onChange={handleChange} placeholder="Auto from ticker" style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
-          <span style={{ fontSize: "0.85rem", color: "#64748b" }}>Defaults to selected ticker volatility</span>
+          <input type="number" step="0.01" name="volatility" value={position.volatility} onChange={handleChange} placeholder="Auto from ticker" style={{
+            padding: "0.5rem",
+            borderRadius: "8px",
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.03)",
+            color: "#e2e8f0"
+          }} />
+          <span style={{ fontSize: "0.85rem", color: "#94a3b8" }}>Defaults to selected ticker volatility</span>
         </label>
       </div>
 
@@ -161,18 +212,18 @@ const PositionForm: React.FC<Props> = ({ portfolio, setPortfolio, defaultVolatil
           onClick={addPosition}
           style={{
             padding: "0.6rem 1rem",
-            backgroundColor: "#10b981",
-            color: "white",
+            backgroundColor: "#38bdf8",
+            color: "#04101c",
             border: "none",
-            borderRadius: "6px",
+            borderRadius: "8px",
             fontWeight: 600,
             cursor: "pointer",
-            boxShadow: "0 4px 6px rgba(16, 185, 129, 0.25)"
+            boxShadow: "0 6px 16px rgba(56, 189, 248, 0.25)"
           }}
         >
           Add Position
         </button>
-        <span style={{ color: "#64748b", fontSize: "0.9rem" }}>
+        <span style={{ color: "#94a3b8", fontSize: "0.9rem" }}>
           Tip: set time in years (0.5 = 6 months)
         </span>
       </div>
@@ -182,7 +233,13 @@ const PositionForm: React.FC<Props> = ({ portfolio, setPortfolio, defaultVolatil
           <h4 style={{ margin: "0 0 0.5rem 0" }}>Current Portfolio</h4>
           <div style={{ display: "grid", gap: "0.5rem" }}>
             {portfolio.map((p, idx) => (
-              <div key={idx} style={{ padding: "0.75rem", border: "1px solid #e2e8f0", borderRadius: "6px", backgroundColor: "#f8fafc" }}>
+              <div key={idx} style={{
+                padding: "0.75rem",
+                border: "1px solid rgba(255,255,255,0.08)",
+                borderRadius: "8px",
+                backgroundColor: "rgba(255,255,255,0.02)",
+                color: "#e2e8f0"
+              }}>
                 [{p.ticker}] {p.side.toUpperCase()} {p.quantity} {p.type.toUpperCase()} @ {p.strike} | T={p.time_to_expiry}y | σ={p.volatility}
               </div>
             ))}
