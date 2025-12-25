@@ -26,7 +26,6 @@ services:
   - type: web
     name: options-risk-frontend
     runtime: static
-    region: oregon
     plan: free
     branch: main
     rootDir: frontend
