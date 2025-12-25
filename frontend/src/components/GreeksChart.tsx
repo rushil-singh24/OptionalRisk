@@ -44,35 +44,40 @@ const GreeksChart: React.FC<Props> = ({ summary }) => {
   };
 
   const explainGreek = (name: string, value: number) => {
-    const abs = Math.abs(value);
-    const direction = value > 0 ? "positive" : value < 0 ? "negative" : "flat";
-    const perDay = abs / 365;
-    const perPct = abs / 100;
-    switch (name) {
-      case "Delta":
-        return direction === "flat"
-          ? "Δ near 0: price changes have little effect."
-          : `Δ ${direction}: portfolio ${direction === "positive" ? "gains" : "loses"} about $${abs.toFixed(2)} per $1 move.`;
-      case "Gamma":
-        return direction === "flat"
-          ? "Γ near 0: delta is stable as price moves."
-          : `Γ ${direction}: delta ${direction === "positive" ? "accelerates" : "decelerates"} as price rises.`;
-      case "Vega":
-        return direction === "flat"
-          ? "Vega near 0: volatility changes have little effect."
-          : `Vega ${direction}: ~$${perPct.toFixed(2)} per 1% vol change (annualized unit basis).`;
-      case "Theta":
-        return direction === "flat"
-          ? "Θ near 0: time decay is minimal."
-          : `Θ ${direction}: annualized ${direction === "negative" ? "lose" : "earn"} ~$${abs.toFixed(2)}; ≈ $${perDay.toFixed(2)} per day.`;
-      case "Rho":
-        return direction === "flat"
-          ? "ρ near 0: rates have little effect."
-          : `ρ ${direction}: ~$${perPct.toFixed(2)} per 1% rate change (annualized unit basis).`;
-      default:
-        return "";
-    }
-  };
+  const abs = Math.abs(value);
+  const direction = value > 0 ? "positive" : value < 0 ? "negative" : "flat";
+  
+  switch (name) {
+    case "Delta":
+      return direction === "flat"
+        ? "Δ near 0: price changes have little effect."
+        : `Δ ${direction}: portfolio ${direction === "positive" ? "gains" : "loses"} about $${abs.toFixed(2)} per $1 stock move.`;
+    
+    case "Gamma":
+      return direction === "flat"
+        ? "Γ near 0: delta is stable as price moves."
+        : `Γ ${direction}: delta changes by ${abs.toFixed(4)} per $1 stock move.`;
+    
+    case "Vega":
+      return direction === "flat"
+        ? "Vega near 0: volatility changes have little effect."
+        : `Vega ${direction}: portfolio ${direction === "positive" ? "gains" : "loses"} $${abs.toFixed(2)} per 1-point vol increase (e.g., 0.25→0.26).`;
+    
+    case "Theta":
+      const perDay = abs / 365;
+      return direction === "flat"
+        ? "Θ near 0: time decay is minimal."
+        : `Θ ${direction}: portfolio ${direction === "negative" ? "loses" : "gains"} $${abs.toFixed(2)}/year in time value (≈$${perDay.toFixed(2)}/day).`;
+    
+    case "Rho":
+      return direction === "flat"
+        ? "ρ near 0: interest rates have little effect."
+        : `ρ ${direction}: portfolio ${direction === "positive" ? "gains" : "loses"} $${abs.toFixed(2)} per 1-point rate increase (e.g., 0.03→0.04).`;
+    
+    default:
+      return "";
+  }
+};
 
   return (
     <div className="card">
