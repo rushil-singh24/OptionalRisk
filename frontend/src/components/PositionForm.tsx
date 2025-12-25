@@ -69,6 +69,11 @@ const PositionForm: React.FC<Props> = ({ portfolio, setPortfolio, defaultVolatil
     setTickerSearch("");
   };
 
+  const removePosition = (idx: number) => {
+    const next = portfolio.filter((_, i) => i !== idx);
+    setPortfolio(next);
+  };
+
   return (
     <div style={{ display: "grid", gap: "0.75rem", color: "#e2e8f0" }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem" }}>
@@ -240,7 +245,24 @@ const PositionForm: React.FC<Props> = ({ portfolio, setPortfolio, defaultVolatil
                 backgroundColor: "rgba(255,255,255,0.02)",
                 color: "#e2e8f0"
               }}>
-                [{p.ticker}] {p.side.toUpperCase()} {p.quantity} {p.type.toUpperCase()} @ {p.strike} | T={p.time_to_expiry}y | σ={p.volatility}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem" }}>
+                  <div>
+                    [{p.ticker}] {p.side.toUpperCase()} {p.quantity} {p.type.toUpperCase()} @ {p.strike} | T={p.time_to_expiry}y | σ={p.volatility}
+                  </div>
+                  <button
+                    onClick={() => removePosition(idx)}
+                    style={{
+                      background: "rgba(239, 68, 68, 0.12)",
+                      color: "#fecdd3",
+                      border: "1px solid rgba(239, 68, 68, 0.35)",
+                      borderRadius: "6px",
+                      padding: "0.3rem 0.55rem",
+                      cursor: "pointer"
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
             ))}
           </div>

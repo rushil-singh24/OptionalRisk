@@ -47,9 +47,10 @@ const MonteCarloChart: React.FC<Props> = ({ portfolio, currentPrice, riskFreeRat
 
   // Create histogram data
   const createHistogram = (values: number[], bins: number = 50) => {
+    if (!values.length) return [];
     const min = Math.min(...values);
     const max = Math.max(...values);
-    const binWidth = (max - min) / bins;
+    const binWidth = (max - min) / bins || 1; // avoid zero width when all values equal
 
     const histogram = Array(bins).fill(0);
     values.forEach(val => {
@@ -114,24 +115,29 @@ const MonteCarloChart: React.FC<Props> = ({ portfolio, currentPrice, riskFreeRat
           </div>
 
           <div>
-            <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>Portfolio Value Distribution</h3>
+            <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>Portfolio P&L Distribution</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={histogramData}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
                 <XAxis 
                   dataKey="value" 
                   tickFormatter={(val) => `$${val.toFixed(0)}`}
-                  label={{ value: "Portfolio Value", position: "insideBottom", offset: -5 }}
+                  label={{ value: "P&L ($)", position: "insideBottom", offset: -5 }}
+                  stroke="#cbd5e1"
                 />
-                <YAxis label={{ value: "Frequency", angle: -90, position: "insideLeft" }} />
+                <YAxis label={{ value: "Frequency", angle: -90, position: "insideLeft" }} stroke="#cbd5e1" />
                 <Tooltip 
                   formatter={(value: any, name: string) => [value, "Frequency"]}
                   labelFormatter={(label) => `Value: $${parseFloat(label).toFixed(2)}`}
+                  contentStyle={{ backgroundColor: "#0b1020", border: "1px solid #1f2937", color: "#e2e8f0" }}
+                  labelStyle={{ color: "#e2e8f0" }}
+                  itemStyle={{ color: "#e2e8f0" }}
                 />
-                <Bar dataKey="count" fill="#6366f1" />
+                <Bar dataKey="count" fill="#38bdf8" />
               </BarChart>
             </ResponsiveContainer>
           </div>
+
         </>
       )}
 

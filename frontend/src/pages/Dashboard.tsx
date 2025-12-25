@@ -17,6 +17,7 @@ const Dashboard: React.FC = () => {
   const [tickers, setTickers] = useState<any[]>([]);
   const [loadingTickers, setLoadingTickers] = useState<boolean>(true);
   const [tickerError, setTickerError] = useState<string>("");
+  const [manualPrices, setManualPrices] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const load = async () => {
@@ -37,8 +38,9 @@ const Dashboard: React.FC = () => {
   const handleTickerSelect = (ticker: string, vol: number, price: number) => {
     setSelectedTicker(ticker);
     setVolatility(vol);
-    setCurrentPrice(price);
-    console.log(`Selected ticker: ${ticker}, σ=${vol}, P=${price}`);
+    const override = manualPrices[ticker];
+    setCurrentPrice(override !== undefined ? override : price);
+    console.log(`Selected ticker: ${ticker}, σ=${vol}, P=${override !== undefined ? override : price}`);
   };
 
   // Auto-select the first ticker once data is available to keep the flow moving
@@ -47,9 +49,10 @@ const Dashboard: React.FC = () => {
       const first = tickers[0];
       setSelectedTicker(first.ticker);
       setVolatility(first.volatility);
-      setCurrentPrice(first.latest_price);
+      const override = manualPrices[first.ticker];
+      setCurrentPrice(override !== undefined ? override : first.latest_price);
     }
-  }, [loadingTickers, tickers, selectedTicker]);
+  }, [loadingTickers, tickers, selectedTicker, manualPrices]);
 
   const handleAnalyze = async () => {
     if (portfolio.length === 0) {
@@ -157,27 +160,50 @@ const Dashboard: React.FC = () => {
           </div>
         </article>
         <article className="info-card">
-          <h3>Monte Carlo intuition</h3>
-          <p>
-            Simulate thousands of price paths (Geometric Brownian Motion: random walks with drift and volatility).
-            Great for visualizing P&amp;L distribution and tail risk, especially when payoffs are path-dependent or non-linear.
-          </p>
-          <ul>
-            <li>Paths: 10,000 by default over a 6M horizon</li>
-            <li>Outputs: histogram of portfolio values plus VaR at 5% and 1%</li>
-            <li>Interpretation: how wide outcomes spread, and where the tails sit</li>
-          </ul>
+          <h3>Monte Carlo, visualized</h3>
+          <p>Paths, drift, and volatility combine to sketch the entire distribution of outcomes.</p>
+          <div className="mc-grid">
+            <div className="mc-box">
+              <div className="mc-label">Process</div>
+              <div className="mc-body">Geometric Brownian Motion with drift r and volatility σ.</div>
+            </div>
+            <div className="mc-box">
+              <div className="mc-label">Paths</div>
+              <div className="mc-body">10,000 scenarios across a 6-month horizon by default.</div>
+            </div>
+            <div className="mc-box">
+              <div className="mc-label">Outputs</div>
+              <div className="mc-body">Portfolio value distribution + VaR at 5% and 1%.</div>
+            </div>
+            <div className="mc-box">
+              <div className="mc-label">Use it for</div>
+              <div className="mc-body">Tail risk, convexity checks, and path-dependent payoffs.</div>
+            </div>
+          </div>
         </article>
         <article className="info-card">
           <h3>Dataset</h3>
           <p>
-            Several years of daily prices (thousands of points per ticker), preprocessed so you get latest close and realized volatility out of the box.
+            Several years of daily prices from a Kaggle-sourced dataset, preprocessed to surface latest close and realized volatility instantly.
           </p>
-          <ul>
-            <li>{loadingTickers ? "Loading coverage…" : `Coverage: ${tickers.length} stocks`} </li>
-            <li>Fields: latest price, historical volatility (σ)</li>
-            <li>Search by ticker or brand name to prefill inputs instantly</li>
-          </ul>
+          <div className="dataset-grid">
+            <div className="dataset-box">
+              <div className="dataset-label">Coverage</div>
+              <div className="dataset-body">{loadingTickers ? "Loading…" : `${tickers.length} tickers with prices + vols`}</div>
+            </div>
+            <div className="dataset-box">
+              <div className="dataset-label">Fields</div>
+              <div className="dataset-body">Latest price, historical volatility (σ), ticker, brand label.</div>
+            </div>
+            <div className="dataset-box">
+              <div className="dataset-label">Prefill</div>
+              <div className="dataset-body">Search by ticker/brand to auto-populate price and σ.</div>
+            </div>
+            <div className="dataset-box">
+              <div className="dataset-label">Source</div>
+              <div className="dataset-body">Derived from Kaggle data.</div>
+            </div>
+          </div>
           {tickerError && <div className="inline-alert">{tickerError}</div>}
         </article>
       </section>
@@ -187,7 +213,7 @@ const Dashboard: React.FC = () => {
         <div className="pill-row">
           <div className="pill strong">1. Learn the models</div>
           <div className="pill strong">2. Select ticker + inputs</div>
-          <div className="pill strong">3. Add option legs</div>
+          <div className="pill strong">3. Build portfolio</div>
           <div className="pill strong">4. Analyze and simulate</div>
         </div>
         <p className="small-muted">Tip: start by clicking a ticker below—volatility and price will prefill.</p>
@@ -202,6 +228,7 @@ const Dashboard: React.FC = () => {
               onSelectTicker={handleTickerSelect}
               tickers={tickers}
               loading={loadingTickers}
+              priceOverrides={manualPrices}
             />
           </div>
           <div className="subcard">
@@ -212,9 +239,16 @@ const Dashboard: React.FC = () => {
                 <input
                   type="number"
                   value={currentPrice}
-                  onChange={e => setCurrentPrice(parseFloat(e.target.value))}
+                  onChange={e => {
+                    const val = parseFloat(e.target.value);
+                    setCurrentPrice(val);
+                    const key = selectedTicker || portfolio[0]?.ticker;
+                    if (key) {
+                      setManualPrices(prev => ({ ...prev, [key]: val }));
+                    }
+                  }}
                 />
-                <div className="helper-text">Auto-filled from historical data</div>
+                <div className="helper-text">Adjust Accordingly</div>
               </div>
               <div>
                 <label className="field-label">Risk-Free Rate (%)</label>

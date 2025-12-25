@@ -79,7 +79,7 @@ def simulate_portfolio(portfolio_positions, S0, T, r, sigma, steps=252, n_simula
     # Portfolio values at the end of the horizon
     final_prices = S_paths[:, -1]
     portfolio_values = np.zeros(n_simulations)
-    
+    # Premium leg costs/income at t=0 (Black-Scholes fair value as proxy)
     for pos in portfolio_positions:
         option_type = pos["type"]
         side = pos["side"]
@@ -88,16 +88,23 @@ def simulate_portfolio(portfolio_positions, S0, T, r, sigma, steps=252, n_simula
         time_to_expiry = pos["time_to_expiry"]
         vol = pos.get("volatility", sigma)
         
-        # For each simulated price, compute option value at horizon
+        # Option payoff at horizon (intrinsic)
         if option_type == "call":
             payoff = np.maximum(final_prices - K, 0)
         else:  # put
             payoff = np.maximum(K - final_prices, 0)
         
+        # Premium (t=0) via Black-Scholes as cost/income
+        premium = black_scholes.black_scholes_price(S0, K, r, vol, time_to_expiry, option_type)
+        
         if side == "short":
-            payoff *= -1
+            payoff *= -1  # reverse payoff for shorts
+            premium *= qty  # income
+        else:
+            premium *= -qty  # cost
         
         portfolio_values += qty * payoff
+        portfolio_values += premium  # add flat premium across all paths
 
     # Compute basic risk statistics
     mean = np.mean(portfolio_values)

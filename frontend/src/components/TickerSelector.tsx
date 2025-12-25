@@ -13,13 +13,15 @@ interface Props {
   onSelectTicker: (ticker: string, volatility: number, price: number) => void;
   tickers: Ticker[];
   loading: boolean;
+  priceOverrides?: Record<string, number>;
 }
 
-const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker, tickers, loading }) => {
+const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker, tickers, loading, priceOverrides = {} }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleSelect = (ticker: Ticker) => {
-    onSelectTicker(ticker.ticker, ticker.volatility, ticker.latest_price);
+    const price = priceOverrides[ticker.ticker] ?? ticker.latest_price;
+    onSelectTicker(ticker.ticker, ticker.volatility, price);
   };
 
   const filteredTickers = tickers.filter(t => {
@@ -105,7 +107,7 @@ const TickerSelector: React.FC<Props> = ({ selectedTicker, onSelectTicker, ticke
                     </div>
                   )}
                   <div style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
-                    σ={ticker.volatility.toFixed(4)} | ${ticker.latest_price.toFixed(2)}
+                    σ={ticker.volatility.toFixed(4)} | ${(priceOverrides[ticker.ticker] ?? ticker.latest_price).toFixed(2)}
                   </div>
                 </div>
                 {selectedTicker === ticker.ticker && (
