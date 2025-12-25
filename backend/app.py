@@ -243,11 +243,15 @@ def simulate_portfolio_route():
 # Run Flask server
 # ----------------------------
 if __name__ == "__main__":
+    # Render sets PORT environment variable in production
+    port = int(os.getenv("PORT", PORT))
+    
     print("\n" + "="*60)
     print("Options Risk Analysis Backend")
     print("="*60)
+    print(f"Environment: {FLASK_ENV}")
     print(f"Tickers loaded: {VOL_DATA['metadata']['total_tickers']}")
-    print(f"Server starting on http://{HOST}:{PORT}")
+    print(f"Server starting on http://{HOST}:{port}")
     print("="*60 + "\n")
     
-    app.run(debug=FLASK_DEBUG, host=HOST, port=PORT)
+    app.run(debug=FLASK_DEBUG, host=HOST, port=port)
