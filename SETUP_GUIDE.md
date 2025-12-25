@@ -1,222 +1,197 @@
-🚀 Options Risk Analysis - Complete Setup Guide
-📋 Prerequisites
-Python 3.8+ installed
-Node.js 18+ and npm installed
-Your stock dataset CSV file(s) in backend/data/raw/
-🔧 Step-by-Step Setup
-Step 1: Backend Setup
-1.1 Navigate to backend folder
-bash
+# Setup Guide
+
+Let's get this running on your machine step by step. No assumptions, just clear instructions.
+
+## What You'll Need
+
+Before starting, make sure you have:
+- **Python 3.8 or newer** ([Download here](https://www.python.org/downloads/))
+- **Node.js 18 or newer** ([Download here](https://nodejs.org/))
+- A terminal/command prompt
+- About 5 minutes
+
+## Step 1: Get the Code
+```bash
+# Clone or download the project
+cd OptionsRiskAnalysis
+```
+
+## Step 2: Set Up the Backend
+
+The backend is the Python/Flask API that does all the calculations.
+
+### 2.1 Open a Terminal in the Backend Folder
+```bash
 cd backend
-1.2 Create virtual environment
-bash
-python -m venv venv
+```
 
-# Activate it:
-# On macOS/Linux:
+### 2.2 Create a Virtual Environment
+
+This keeps your Python packages organized and separate from other projects.
+
+**On Mac/Linux:**
+```bash
+python3 -m venv venv
 source venv/bin/activate
-# On Windows:
-venv\Scripts\activate
-1.3 Install dependencies
-bash
-pip install -r requirements.txt
-1.4 Process your dataset
-bash
-python data/raw/preprocess_data.py
-Expected output:
+```
 
+**On Windows:**
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+You should see `(venv)` appear in your terminal prompt - that means it worked!
+
+### 2.3 Install Python Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+This installs Flask, NumPy, Pandas, SciPy, and other packages. Takes about 30-60 seconds.
+
+### 2.4 Process the Stock Data
+
+This creates the `volatility.json` file with pre-calculated values.
+```bash
+python data/raw/preprocess_data.py
+```
+
+You should see:
+```
 ============================================================
 Historical Volatility Calculator
 ============================================================
 Found 1 CSV file(s)
 
 Processing your_file.csv...
-  Found 3 unique tickers: PTON, CROX, ADDYY
-    PTON: σ=0.4523, Price=$6.64, N=252
-    CROX: σ=0.3891, Price=$107.34, N=252
-    ADDYY: σ=0.2456, Price=$121.93, N=252
+  Found 61 unique tickers...
 
-============================================================
-✓ Processed 3 tickers
+✓ Processed 61 tickers
 ✓ Output saved to: backend/data/processed/volatility.json
 ============================================================
-1.5 Start the Flask backend
-bash
-python app.py
-You should see:
+```
 
+### 2.5 Start the Backend Server
+```bash
+python app.py
+```
+
+You should see:
+```
 ============================================================
 Options Risk Analysis Backend
 ============================================================
-Tickers loaded: 3
-Server starting on http://127.0.0.1:5000
+Tickers loaded: 61
+Server starting on http://127.0.0.1:5001
 ============================================================
-✅ Backend is now running on port 5000
+```
 
-Step 2: Frontend Setup
-2.1 Open a NEW terminal and navigate to frontend
-bash
+**Leave this terminal running!** The backend needs to stay on.
+
+## Step 3: Set Up the Frontend
+
+Open a **NEW terminal** (keep the backend running in the first one).
+
+### 3.1 Navigate to Frontend Folder
+```bash
 cd frontend
-2.2 Install dependencies
-bash
-npm install
-2.3 Start the development server
-bash
-npm run dev
-You should see:
+```
 
+### 3.2 Install JavaScript Dependencies
+```bash
+npm install
+```
+
+This downloads React, Vite, and other packages. Takes about 60-90 seconds.
+
+### 3.3 Start the Development Server
+```bash
+npm run dev
+```
+
+You should see:
+```
   VITE v6.0.3  ready in 234 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
-✅ Frontend is now running on port 5173
+```
 
-🎯 Using the Application
-Step 1: Open the Dashboard
-Navigate to: http://localhost:5173
+## Step 4: Open the App
 
-Step 2: Select a Stock
-Search for a ticker (e.g., "PTON")
-Click to select it
-Volatility and price will auto-populate
-Step 3: Build Your Portfolio
-Add options positions:
+1. Open your browser
+2. Go to: **http://localhost:5173**
+3. You should see the dashboard!
 
-Type: Call or Put
-Side: Long or Short
-Quantity: Number of contracts
-Strike Price: Exercise price
-Time to Expiry: In years (e.g., 0.5 = 6 months)
-Volatility: Auto-filled from dataset
-Click "Add Position" after each entry.
+## Using the App - Quick Start
 
-Step 4: Analyze
-Click "📊 Analyze Portfolio"
+### Select a Stock
+1. Look for the "Select Stock Ticker" section
+2. Type to search (try "PTON" or "AAPL")
+3. Click a ticker - volatility and price auto-fill
 
-You'll see:
+### Build a Position
+1. Choose option type (Call or Put)
+2. Choose side (Long or Short)
+3. Enter strike price (e.g., 110)
+4. Enter time to expiry (0.5 = 6 months)
+5. Click "Add Position"
 
-Portfolio value
-All Greeks (Delta, Gamma, Vega, Theta, Rho)
-Individual position breakdown
-Greeks visualization chart
-Step 5: Run Monte Carlo Simulation
-Click "Run Monte Carlo (10,000 paths)"
+### Analyze
+1. Click "📊 Analyze Portfolio"
+2. See portfolio value and Greeks
+3. Click "Run Monte Carlo" for risk simulation
 
-Results include:
+## Troubleshooting
 
-Mean P&L
-Standard deviation
-Value at Risk (VaR) at 5% and 1%
-Distribution histogram
-📁 File Structure
-OptionsRiskAnalysis/
-├── backend/
-│   ├── data/
-│   │   ├── raw/               # Your CSV files go here
-│   │   │   └── stocks.csv
-│   │   └── processed/
-│   │       └── volatility.json  # Generated by preprocess_data.py
-│   ├── models/
-│   │   └── black_scholes.py   # BS pricing and Greeks
-│   ├── services/
-│   │   ├── portfolio.py       # Portfolio analytics
-│   │   └── monte_carlo.py     # MC simulation
-│   ├── app.py                 # Flask API
-│   └── requirements.txt
-│
-└── frontend/
-    ├── src/
-    │   ├── components/
-    │   │   ├── TickerSelector.tsx
-    │   │   ├── PositionForm.tsx
-    │   │   ├── PortfolioSummary.tsx
-    │   │   ├── GreeksChart.tsx
-    │   │   └── MonteCarloChart.tsx
-    │   ├── pages/
-    │   │   └── Dashboard.tsx
-    │   ├── api.ts
-    │   ├── App.tsx
-    │   └── main.tsx
-    └── package.json
-🔍 Testing Your Setup
-Test Backend API:
-bash
-# Test health endpoint
-curl http://127.0.0.1:5000/health
+### "Port 5001 already in use"
+Something else is using port 5001. Either:
+- Find and stop that program, or
+- Edit `backend/app.py`, change line 101 from `port=5001` to `port=5002`
+- Edit `frontend/src/api.ts`, change the port in `API_BASE`
 
-# Get all tickers
-curl http://127.0.0.1:5000/market/tickers
+### "volatility.json not found"
+You need to run the preprocessing script:
+```bash
+cd backend
+python data/raw/preprocess_data.py
+```
 
-# Get specific ticker
-curl http://127.0.0.1:5000/market/volatility/PTON
-Example Portfolio Analysis Request:
-bash
-curl -X POST http://127.0.0.1:5000/portfolio/analyze \
-  -H "Content-Type: application/json" \
-  -d '{
-    "portfolio": [
-      {
-        "type": "call",
-        "side": "long",
-        "quantity": 1,
-        "strike": 110,
-        "time_to_expiry": 0.5,
-        "volatility": 0.35
-      }
-    ],
-    "current_price": 107.34,
-    "risk_free_rate": 0.03,
-    "ticker": "CROX"
-  }'
-🐛 Troubleshooting
-Backend Issues:
-Problem: FileNotFoundError: volatility.json Solution: Run python data/raw/preprocess_data.py first
+### Backend won't start
+Make sure your virtual environment is activated - you should see `(venv)` in your prompt.
 
-Problem: ModuleNotFoundError: No module named 'flask' Solution: Make sure virtual environment is activated and run pip install -r requirements.txt
+### Frontend shows connection errors
+1. Make sure the backend is running (check the terminal)
+2. Check the backend URL in browser: http://127.0.0.1:5001/health
+3. You should see: `{"status":"ok","tickers_loaded":61}`
 
-Problem: Port 5000 already in use Solution: Kill the process using port 5000 or change the port in app.py
+### Nothing shows up in the browser
+1. Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+2. Check browser console for errors (F12 key)
+3. Make sure you're on http://localhost:5173
 
-Frontend Issues:
-Problem: CORS error when calling API Solution: Make sure backend is running and CORS is enabled in app.py
+## Stopping the Servers
 
-Problem: Cannot connect to backend Solution: Verify backend is running on http://127.0.0.1:5000
+When you're done:
+1. In the backend terminal: Press `Ctrl+C`
+2. In the frontend terminal: Press `Ctrl+C`
 
-📊 Dataset Requirements
-Your CSV must have these columns:
+## Next Steps
 
-Date - Trading date
-Close - Closing price
-Ticker - Stock symbol
-Optional columns:
+- Try different option strategies (spreads, straddles)
+- Adjust the risk-free rate
+- Compare different tickers
+- Run Monte Carlo with different position sizes
 
-Open, High, Low, Volume
-Brand_Name, Industry_Tag, Country
-Minimum data: 30 trading days per ticker
+## Need Help?
 
-🎨 Customization
-Add More Stocks:
-Add CSV files to backend/data/raw/
-Run python data/raw/preprocess_data.py
-Restart backend
-Change Risk-Free Rate:
-Update in the Dashboard UI or modify default in Dashboard.tsx
+Check that:
+- [ ] Backend is running on port 5001
+- [ ] Frontend is running on port 5173
+- [ ] `volatility.json` exists in `backend/data/processed/`
+- [ ] Virtual environment is activated (you see `venv` in prompt)
 
-Adjust Monte Carlo Parameters:
-In MonteCarloChart.tsx, change:
+---
 
-n_simulations: Number of paths (default: 10,000)
-horizon: Time horizon in years (default: 0.5)
-🚀 Next Steps
-Add more stocks to your dataset
-Implement portfolio strategies (spreads, straddles, etc.)
-Add real-time data integration
-Export results to PDF/Excel
-Add more visualizations (3D surface plots, heat maps)
-📝 Example Workflow
-1. Start backend  → python app.py
-2. Start frontend → npm run dev
-3. Select CROX
-4. Add Call: Long, 1 contract, $110 strike, 6 months
-5. Add Put: Short, 1 contract, $100 strike, 6 months
-6. Analyze Portfolio → See Greeks
-7. Run Monte Carlo → See risk distribution
+**You're all set!** Start exploring options pricing and risk analysis.
